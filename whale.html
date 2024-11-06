@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Whale Tracker</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+        #map {
+            height: 100vh; /* Full height of the viewport */
+        }
+        .whale-image {
+            width: 100px; /* Adjust size as needed */
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+        const map = L.map('map').setView([8.0, 80.0], 6); // Center around Sri Lanka
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+        }).addTo(map);
+
+        const whaleMarkers = {};
+        const whalePaths = {};
+        const whaleNames = ['Fin Whale 1', 'Fin Whale 2', 'Fin Whale 3', 'Fin Whale 4'];
+        const whaleImages = [
+            'whale1.jpeg',
+            'whale2.jpeg',
+            'whale3.jpeg',
+            'whale4.jpeg'
+        ];
+
+        // Updated positions of the whales
+        const initialPositions = [
+            [-5.5, 81.0], // Near eastern coast of Sri Lanka
+            [-6.0, 79.5], // Near western coast of Sri Lanka
+            [-6.5, 80.0], // Just below Sri Lanka
+            [-5.5, 81.5]  // Approximately 20 km east of Sri Lanka
+        ];
+
+        whaleNames.forEach((name, index) => {
+            const [lat, lon] = initialPositions[index];
+            const marker = L.marker([lat, lon]).addTo(map)
+                .bindPopup(`<strong>${name}</strong><br><img class="whale-image" src="${whaleImages[index]}" alt="${name} Image"><br>Location: ${lat}° S, ${lon}° E`)
+                .openPopup();
+            whaleMarkers[index + 1] = marker;
+            whalePaths[index + 1] = [[lat, lon]];
+        });
+
+        function updateWhaleLocations() {
+            for (let id = 1; id <= 4; id++) {
+                const latOffset = (Math.random() - 0.5) * 0.05; // Small random movement
+                const lonOffset = (Math.random() - 0.5) * 0.05; // Small random movement
+                const [lat, lon] = [initialPositions[id - 1][0] + latOffset, initialPositions[id - 1][1] + lonOffset];
+
+                // Update existing marker position
+                whaleMarkers[id].setLatLng([lat, lon]);
+                
+                // Update the path with a new point
+                whalePaths[id].push([lat, lon]);
+                L.polyline(whalePaths[id], { color: 'blue' }).addTo(map);
+            }
+        }
+
+        // Update whale locations every 5 seconds
+        setInterval(updateWhaleLocations, 5000);
+    </script>
+</body>
+</html>
